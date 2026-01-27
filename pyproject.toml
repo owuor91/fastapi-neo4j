@@ -1,0 +1,33 @@
+[tool.black]
+line-length = 79
+target-version = ['py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.autopep8]
+max_line_length = 79
+in_place = false
+aggressive = 1
+
+[tool.ruff]
+line-length = 79
+target-version = "py311"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

@@ -30,4 +30,3 @@ class CommentResponse(BaseModel):
     author_id: str
     author_username: str
     created_at: datetime
-   

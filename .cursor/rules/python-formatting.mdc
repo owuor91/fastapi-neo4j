@@ -1,0 +1,55 @@
+---
+description: Python code formatting standards - 79 character line limit
+globs: **/*.py
+alwaysApply: false
+---
+
+# Python Formatting Standards
+
+## Line Length
+
+**All Python code must have a maximum line length of 79 characters.**
+
+This follows PEP 8 guidelines and ensures code readability across different displays and environments.
+
+### Guidelines
+
+- Break long lines using Python's implicit line continuation inside parentheses, brackets, and braces
+- Use backslashes for line continuation only when necessary
+- Prefer breaking at natural points (commas, operators, etc.)
+- Indent continuation lines appropriately
+
+### Examples
+
+```python
+# ❌ BAD - Line exceeds 79 characters
+def create_user(username: str, email: str, password: str, first_name: str, last_name: str) -> User:
+
+# ✅ GOOD - Line broken appropriately
+def create_user(
+    username: str,
+    email: str,
+    password: str,
+    first_name: str,
+    last_name: str,
+) -> User:
+
+# ❌ BAD - Long string or expression
+result = some_very_long_function_name(argument1, argument2, argument3, argument4, argument5)
+
+# ✅ GOOD - Broken across lines
+result = some_very_long_function_name(
+    argument1,
+    argument2,
+    argument3,
+    argument4,
+    argument5,
+)
+```
+
+### When Editing Python Files
+
+- Always check line length before saving
+- Automatically reformat code to ensure no line exceeds 79 characters
+- Break long lines at logical points (commas, operators, parentheses)
+- Maintain proper indentation for continuation lines

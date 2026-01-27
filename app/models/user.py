@@ -9,12 +9,13 @@ class UserBase(BaseModel):
     full_name: Optional[str] = None
     bio: Optional[str] = Field(None, max_length=200)
 
-
     @field_validator("username")
     @classmethod
     def username_alphanumeric(cls, v):
         if not v.replace("_", "").isalnum():
-            raise ValueError("Username must contain only alphanumeric characters and underscores")
+            raise ValueError(
+                "Username must contain only alphanumeric characters and underscores"
+            )
         return v
 
 
@@ -27,4 +28,3 @@ class UserResponse(UserBase):
     created_at: datetime
     follower_count: int = 0
     following_count: int = 0
-
