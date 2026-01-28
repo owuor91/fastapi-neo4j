@@ -7,7 +7,7 @@ from app.utils.security import verify_password
 
 
 class UserService:
-    
+
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -43,13 +43,15 @@ class UserService:
             full_name=user_create.full_name,
             bio=user_create.bio,
             password_hash=hashed_password,
-            created_at=datetime.now(timezone.utc.now).isoformat()
+            created_at=datetime.now(timezone.utc.now).isoformat(),
         )
 
         record = await result.single()
         if not record:
-            raise ValueError("User with given email or username already exists.")   
-        
+            raise ValueError(
+                "User with given email or username already exists."
+            )
+
         user_node = record["u"]
         return UserResponse(
             user_id=user_node["user_id"],
@@ -59,11 +61,12 @@ class UserService:
             bio=user_node["bio"],
             created_at=user_node["created_at"],
             followers_count=0,
-            following_count=0
+            following_count=0,
         )
 
-    
-    async def authenticate_user(self, email:str, password: str)-> Optional[dict]:
+    async def authenticate_user(
+        self, email: str, password: str
+    ) -> Optional[dict]:
         query = """
         MATCH (u:User {email: $email})
         RETURN u
@@ -75,22 +78,23 @@ class UserService:
         if not record:
             return None
 
-        user_node = record['u']
+        user_node = record["u"]
 
-        if not verify_password(password, user_node['password_hash']):
+        if not verify_password(password, user_node["password_hash"]):
             return None
 
         return {
-            'user_id': user_node['user_id'],
-            'email': user_node['email'],
-            'username': user_node['username'],
-            'full_name': user_node['full_name'],
-            'bio': user_node['bio'],
-            'created_at': user_node['created_at']
+            "user_id": user_node["user_id"],
+            "email": user_node["email"],
+            "username": user_node["username"],
+            "full_name": user_node["full_name"],
+            "bio": user_node["bio"],
+            "created_at": user_node["created_at"],
         }
 
-
-        async def get_user_profile(self, user_id: str) -> Optional[UserResponse]:
+        async def get_user_profile(
+            self, user_id: str
+        ) -> Optional[UserResponse]:
             query = f"""
             MATCH (u:User {user_id: $user_id})
 
@@ -112,21 +116,21 @@ class UserService:
             if not record:
                 return None
 
-            user_node = record['u']
+            user_node = record["u"]
             return UserResponse(
-                user_id=user_node['user_id'],
-                email=user_node['email'],
-                username=user_node['username'],
-                full_name=user_node['full_name'],
-                bio=user_node['bio'],   
-                created_at=user_node['created_at'],
-                follower_count=record['follower_count'],
-                following_count=record['following_count']
+                user_id=user_node["user_id"],
+                email=user_node["email"],
+                username=user_node["username"],
+                full_name=user_node["full_name"],
+                bio=user_node["bio"],
+                created_at=user_node["created_at"],
+                follower_count=record["follower_count"],
+                following_count=record["following_count"],
             )
 
-
-        
-        async def search_users(self, query_str: str, limit: int = 20)-> List[UserResponse]:
+        async def search_users(
+            self, query_str: str, limit: int = 20
+        ) -> List[UserResponse]:
             query = f"""
             MATCH (u:User)
             WHERE toLower(u.username) CONTAINS toLower($query) OR toLower(u.full_name)
@@ -143,24 +147,23 @@ class UserService:
             LIMIT $limit
             """
 
-            result = await self.session.run(query, query=query_str, limit=limit)
+            result = await self.session.run(
+                query, query=query_str, limit=limit
+            )
 
             users = []
             async for record in result:
-                user_node = record['u']
+                user_node = record["u"]
                 users.append(
                     UserResponse(
-                        user_id=user_node['user_id'],
-                        email=user_node['email'],
-                        username=user_node['username'],
-                        full_name=user_node['full_name'],
-                        bio=user_node['bio'],
-                        created_at=user_node['created_at'],
-                        follower_count=record['follower_count'],
-                        following_count=record['following_count']
+                        user_id=user_node["user_id"],
+                        email=user_node["email"],
+                        username=user_node["username"],
+                        full_name=user_node["full_name"],
+                        bio=user_node["bio"],
+                        created_at=user_node["created_at"],
+                        follower_count=record["follower_count"],
+                        following_count=record["following_count"],
+                    )
                 )
-
-
-
-        
-
+            return users
