@@ -35,3 +35,20 @@ def decode_access_token(token: str) -> dict:
         return payload
     except JWTError as e:
         raise e
+
+
+def create_refresh_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(datetime.timezone.utc) + timedelta(days=7)
+
+    to_encode.update(
+        {
+            "exp": expire,
+            "iat": datetime.now(datetime.timezone.utc),
+            "type": "refresh",
+        }
+    )
+    encoded_jwt = jwt.encode(
+        to_encode, settings.secret_key, algorithm=settings.algorithm
+    )
+    return encoded_jwt

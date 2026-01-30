@@ -10,12 +10,12 @@ class SocialService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def follow_user(self, follower_id:str, following_id: str) -> bool:
+    async def follow_user(self, follower_id: str, following_id: str) -> bool:
         if follower_id == following_id:
             raise ValueError("You cannot follow yourself")
 
         created_at = datetime.now(timezone.utc).isoformat()
-        
+
         query = f"""
         MATCH (follower: User {user_id: $follower_id})
         MATCH (following: User {user_id: $following_id})
@@ -35,8 +35,7 @@ class SocialService:
         record = await result.single()
         return record is not None
 
-
-    async def unfollow_user(self, follower_id:str, following_id: str) -> bool:
+    async def unfollow_user(self, follower_id: str, following_id: str) -> bool:
         if follower_id == following_id:
             raise ValueError("You cannot unfollow yourself")
 
@@ -55,8 +54,9 @@ class SocialService:
         record = await result.single()
         return record["deleted_count"] > 0
 
-
-    async def get_followers(self, user_id: str, limit:int=50) -> List[UserResponse]:
+    async def get_followers(
+        self, user_id: str, limit: int = 50
+    ) -> List[UserResponse]:
         query = """
         MATCH (follower: User)-[:FOLLOWS]->(u:User {user_id: $user_id})
         return follower
@@ -72,7 +72,7 @@ class SocialService:
         LIMIT $limit
         """
 
-        result  = await self.session.run(
+        result = await self.session.run(
             query,
             user_id=user_id,
             limit=limit,
@@ -82,21 +82,24 @@ class SocialService:
 
         async for record in result:
             user_node = record["follower"]
-            followers.append(UserResponse(
-                user_id=user_node["user_id"],
-                email=user_node["email"],
-                username=user_node["username"],
-                full_name=user_node["full_name"],
-                bio=user_node["bio"],
-                created_at=user_node["created_at"],
-                follower_count=record["follower_count"],
-                following_count=record["following_count"],
-            ))
+            followers.append(
+                UserResponse(
+                    user_id=user_node["user_id"],
+                    email=user_node["email"],
+                    username=user_node["username"],
+                    full_name=user_node["full_name"],
+                    bio=user_node["bio"],
+                    created_at=user_node["created_at"],
+                    follower_count=record["follower_count"],
+                    following_count=record["following_count"],
+                )
+            )
 
         return followers
 
-
-    async def get_mutual_followers(self, user1_id: str, user2_id: str) -> List[UserResponse]:
+    async def get_mutual_followers(
+        self, user1_id: str, user2_id: str
+    ) -> List[UserResponse]:
         query = """
         MATCH (mutual: User)-[:FOLLOWS]->(u1:User {user_id: $user1_id})
         MATCH (mutual)-[:FOLLOWS]->(u2:User {user_id: $user2_id})
@@ -114,20 +117,22 @@ class SocialService:
         mutual_followers = []
         async for record in result:
             user_node = record["mutual"]
-            mutual_followers.append(UserResponse(
-                user_id=user_node["user_id"],
-                email=user_node["email"],
-                username=user_node["username"],
-                full_name=user_node["full_name"],
-                bio=user_node["bio"],
-                created_at=user_node["created_at"],
-            ))
+            mutual_followers.append(
+                UserResponse(
+                    user_id=user_node["user_id"],
+                    email=user_node["email"],
+                    username=user_node["username"],
+                    full_name=user_node["full_name"],
+                    bio=user_node["bio"],
+                    created_at=user_node["created_at"],
+                )
+            )
 
         return mutual_followers
-        
-        
 
-    async def get_feed(self, user_id: str, limit:int=50) -> List[PostResponse]:
+    async def get_feed(
+        self, user_id: str, limit: int = 50
+    ) -> List[PostResponse]:
         query = """
         MATCH (me:User {user_id: $user_id})
 
@@ -157,22 +162,25 @@ class SocialService:
         async for record in result:
             post_node = record["p"]
             author_node = record["author"]
-            feed.append(PostResponse(
-                post_id=post_node["post_id"],
-                content=post_node["content"],
-                image_url=post_node["image_url"],       
-                author_id=author_node["user_id"],
-                author_username=author_node["username"],
-                created_at=post_node["created_at"],
-                likes_count=record["likes_count"],
-                comments_count=record["comments_count"],
-                is_liked=record["is_liked"],
-            ))
+            feed.append(
+                PostResponse(
+                    post_id=post_node["post_id"],
+                    content=post_node["content"],
+                    image_url=post_node["image_url"],
+                    author_id=author_node["user_id"],
+                    author_username=author_node["username"],
+                    created_at=post_node["created_at"],
+                    likes_count=record["likes_count"],
+                    comments_count=record["comments_count"],
+                    is_liked=record["is_liked"],
+                )
+            )
 
         return feed
-        
 
-    async def suggest_users(self, user_id: str, limit:int=50) -> List[UserResponse]:
+    async def suggest_users(
+        self, user_id: str, limit: int = 50
+    ) -> List[UserResponse]:
         query = """
         MATCH (me:User {user_id: $user_id})-[:FOLLOWS]->(friend)
         MATCH(friend)-[:FOLLOWS]->(suggestion: User)
@@ -196,19 +204,23 @@ class SocialService:
             user_id=user_id,
             limit=limit,
         )
-        
+
         suggestions = []
         async for record in result:
             user_node = record["suggestion"]
-            suggestions.append(UserResponse(
-                user_id=user_node["user_id"],
-                email=user_node["email"],
-                username=user_node["username"],
-                full_name=user_node["full_name"],
-                bio=user_node["bio"],
-                created_at=user_node["created_at"],
-                common_connections_count=record["common_connections_count"],
-                follower_count=record["follower_count"],
-                following_count=record["following_count"],
-            ))
+            suggestions.append(
+                UserResponse(
+                    user_id=user_node["user_id"],
+                    email=user_node["email"],
+                    username=user_node["username"],
+                    full_name=user_node["full_name"],
+                    bio=user_node["bio"],
+                    created_at=user_node["created_at"],
+                    common_connections_count=record[
+                        "common_connections_count"
+                    ],
+                    follower_count=record["follower_count"],
+                    following_count=record["following_count"],
+                )
+            )
         return suggestions
