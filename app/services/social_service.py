@@ -112,7 +112,16 @@ class SocialService:
     ) -> List[UserResponse]:
         query = """
         MATCH (u:User {user_id: $user_id})-[:FOLLOWS]->(following:User)
-        return following
+
+        OPTIONAL MATCH (following)-[:FOLLOWS]->(follower)
+        WITH following, COUNT(DISTINCT follower) AS follower_count
+
+        OPTIONAL MATCH (f:User)-[:FOLLOWS]->(following)
+        WITH following, follower_count, COUNT(DISTINCT f) AS following_count
+
+        RETURN following, follower_count, following_count
+        ORDER BY following.username
+        LIMIT $limit
         """
 
         result = await self.session.run(
@@ -132,6 +141,8 @@ class SocialService:
                     full_name=user_node["full_name"],
                     bio=user_node["bio"],
                     created_at=user_node["created_at"],
+                    follower_count=record["follower_count"],
+                    following_count=record["following_count"],
                 )
             )
 
