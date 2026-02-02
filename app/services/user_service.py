@@ -94,9 +94,7 @@ class UserService:
             "created_at": user_node["created_at"],
         }
 
-    async def get_user_profile(
-        self, user_id: str
-    ) -> Optional[UserResponse]:
+    async def get_user_profile(self, user_id: str) -> Optional[UserResponse]:
         query = f"""
         MATCH (u:User {user_id: $user_id})
 
@@ -149,9 +147,7 @@ class UserService:
         LIMIT $limit
         """
 
-        result = await self.session.run(
-            query, query=query_str, limit=limit
-        )
+        result = await self.session.run(query, query=query_str, limit=limit)
 
         users = []
         async for record in result:

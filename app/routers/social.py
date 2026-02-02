@@ -86,7 +86,7 @@ async def get_mutual_followers(
     status_code=status.HTTP_200_OK,
 )
 async def get_feed(
-    user_id: str=Depends(get_current_user),
+    user_id: str = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     limit: int = 50,
 ) -> List[PostResponse]:

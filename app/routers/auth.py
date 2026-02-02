@@ -37,7 +37,7 @@ async def signup(
 async def login(
     login_request: LoginRequest,
     session: AsyncSession = Depends(get_db_session),
-) -> LoginResponse:         
+) -> LoginResponse:
     user_service = UserService(session)
     try:
         user = await user_service.authenticate_user(
