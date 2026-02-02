@@ -16,7 +16,7 @@ class SocialService:
 
         created_at = datetime.now(timezone.utc).isoformat()
 
-        query = f"""
+        query = """
         MATCH (follower: User {user_id: $follower_id})
         MATCH (following: User {user_id: $following_id})
 
@@ -39,7 +39,7 @@ class SocialService:
         if follower_id == following_id:
             raise ValueError("You cannot unfollow yourself")
 
-        query = f"""
+        query = """
         MATCH (follower: User {user_id: $follower_id})-[r:FOLLOWS]->(following: User {user_id: $following_id})
         DELETE r
         RETURN count(r) AS deleted_count
@@ -96,6 +96,36 @@ class SocialService:
             )
 
         return followers
+
+    async def get_following(
+        self, user_id: str, limit: int = 50
+    ) -> List[UserResponse]:
+        query = f"""
+        MATCH (u:User {user_id: $user_id})-[:FOLLOWS]->(following:User)
+        return following
+        """
+
+        result = await self.session.run(
+            query,
+            user_id=user_id,
+            limit=limit,
+        )
+
+        following = []
+        async for record in result:
+            user_node = record["following"]
+            following.append(
+                UserResponse(
+                    user_id=user_node["user_id"],
+                    email=user_node["email"],
+                    username=user_node["username"],
+                    full_name=user_node["full_name"],
+                    bio=user_node["bio"],
+                    created_at=user_node["created_at"],
+                )
+            )
+
+        return following
 
     async def get_mutual_followers(
         self, user1_id: str, user2_id: str
