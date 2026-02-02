@@ -55,6 +55,7 @@ fastapi-neo4j/
 │       ├── dependencies.py   # get_db_session, get_current_user
 │       ├── security.py       # JWT, password hashing
 │       └── neo4j_helpers.py  # Neo4j DateTime conversion
+├── neo4j_test_data_queries.cypher   # Test data for development
 ├── requirements.txt
 ├── pyproject.toml        # Black, Ruff config
 └── README.md
@@ -103,6 +104,20 @@ docker run -d --name neo4j \
 
 - Neo4j Browser: `http://localhost:7474`
 - Bolt: `bolt://localhost:7687`
+
+## Test Data
+
+The [neo4j_test_data_queries.cypher](neo4j_test_data_queries.cypher) file contains
+Cypher queries to seed the database with realistic test data for development.
+It includes:
+
+- Constraints and indexes (user_id, email, username, post_id, comment_id)
+- Test users (with password hash for `password123`)
+- Posts, comments, likes, and follow relationships
+
+Run the queries in Neo4j Browser (`http://localhost:7474`) or via cypher-shell.
+Execute sections in order as indicated in the file. The optional clean-up section
+at the top will delete all data if you need a fresh start.
 
 ## Running the Application
 
