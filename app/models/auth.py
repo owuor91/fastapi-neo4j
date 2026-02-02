@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -21,6 +22,7 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     access_token: str
+    refresh_token: Optional[str] = None
     token_type: str = "bearer"
     user_id: str
     username: str
@@ -41,6 +43,7 @@ class TokenRefreshRequest(BaseModel):
 
 class TokenRefreshResponse(BaseModel):
     access_token: str
+    refresh_token: Optional[str] = None
     token_type: str = "bearer"
     user_id: str
     username: str

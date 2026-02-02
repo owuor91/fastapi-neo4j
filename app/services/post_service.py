@@ -1,8 +1,10 @@
 from app.models.post import (
+    LikePostResponse,
     PostCreate,
     PostResponse,
     CommentCreate,
     CommentResponse,
+    UnlikePostResponse,
 )
 from neo4j import AsyncSession
 from datetime import datetime, timezone
@@ -100,7 +102,7 @@ class PostService:
             is_liked=record["is_liked"],
         )
 
-    async def like_post(self, user_id: str, post_id: str) -> bool:
+    async def like_post(self, user_id: str, post_id: str) -> LikePostResponse:
         query = """
         MATCH (u:User {user_id: $user_id})
         MATCH (p:Post {post_id: $post_id})
@@ -117,13 +119,17 @@ class PostService:
         )
 
         record = await result.single()
-        if not record:
-            return False
+        return LikePostResponse(
+            post_id=post_id,
+            user_id=user_id,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            success=record is not None,
+        )
 
-        return True
-
-    async def unlike_post(self, user_id: str, post_id: str) -> bool:
-        query = f"""
+    async def unlike_post(
+        self, user_id: str, post_id: str
+    ) -> UnlikePostResponse:
+        query = """
         MATCH (u:User {user_id: $user_id})-[r:LIKES]->(p:Post {post_id: $post_id})
         DELETE r
         RETURN COUNT(r) AS deleted_count
@@ -133,10 +139,13 @@ class PostService:
         )
 
         record = await result.single()
-        if not record:
-            return False
-
-        return record["deleted_count"] > 0
+        deleted = record["deleted_count"] > 0 if record else False
+        return UnlikePostResponse(
+            post_id=post_id,
+            user_id=user_id,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            success=deleted,
+        )
 
     async def create_comment(
         self, user_id: str, post_id: str, comment_create: CommentCreate

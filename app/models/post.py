@@ -28,6 +28,30 @@ class PostResponse(BaseModel):
         return to_python_datetime(v)
 
 
+class LikePostResponse(BaseModel):
+    post_id: str
+    user_id: str
+    created_at: datetime
+    success: bool
+
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def parse_created_at(cls, v):
+        return to_python_datetime(v)
+
+
+class UnlikePostResponse(BaseModel):
+    post_id: str
+    user_id: str
+    created_at: datetime
+    success: bool
+
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def parse_created_at(cls, v):
+        return to_python_datetime(v)
+
+
 class CommentCreate(BaseModel):
     content: str = Field(min_length=1, max_length=200)
 

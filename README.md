@@ -118,10 +118,11 @@ uvicorn app.main:app --reload --host 0.0.0.0
 
 ### Authentication (`/auth`)
 
-| Method | Endpoint       | Auth | Description                |
-| ------ | -------------- | ---- | -------------------------- |
-| POST   | `/auth/signup` | No   | Register user              |
-| POST   | `/auth/login`  | No   | Login (returns JWT + user) |
+| Method | Endpoint        | Auth | Description                     |
+| ------ | --------------- | ---- | ------------------------------- |
+| POST   | `/auth/signup`  | No   | Register user                   |
+| POST   | `/auth/login`   | No   | Login (returns JWT + refresh)   |
+| POST   | `/auth/refresh` | No   | Refresh access token            |
 
 ### Users (`/users`)
 
@@ -157,7 +158,9 @@ uvicorn app.main:app --reload --host 0.0.0.0
 ## Authentication
 
 - **Login**: `POST /auth/login` with `{"email": "...", "password": "..."}`
-  returns `access_token` and user info.
+  returns `access_token`, `refresh_token`, and user info.
+- **Refresh**: `POST /auth/refresh` with `{"refresh_token": "..."}` returns new
+  `access_token` and `refresh_token` (token rotation).
 - **Protected routes**: Use header `Authorization: Bearer <token>`.
 - OAuth2 scheme: `OAuth2PasswordBearer` (tokenUrl: `auth/login`).
 
@@ -230,6 +233,14 @@ curl -X POST http://localhost:8000/auth/signup \
 curl -X POST http://localhost:8000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"secretpass123"}'
+```
+
+**Refresh token**
+
+```bash
+curl -X POST http://localhost:8000/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refresh_token":"<your_refresh_token>"}'
 ```
 
 **Create post (with token)**

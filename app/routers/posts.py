@@ -1,11 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from neo4j import AsyncSession
 
-from app.models.post import PostCreate, PostResponse
+from app.models.post import (
+    CommentCreate,
+    CommentResponse,
+    LikePostResponse,
+    PostCreate,
+    PostResponse,
+    UnlikePostResponse,
+)
 from app.utils.dependencies import get_db_session, get_current_user
 from app.services.post_service import PostService
 from typing import List
-from app.models.post import CommentCreate, CommentResponse
 
 posts_router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -34,26 +40,32 @@ async def get_post(
     return post
 
 
-@posts_router.post("/{post_id}/like", status_code=status.HTTP_200_OK)
+@posts_router.post(
+    "/{post_id}/like",
+    response_model=LikePostResponse,
+    status_code=status.HTTP_200_OK,
+)
 async def like_post(
     post_id: str,
     session: AsyncSession = Depends(get_db_session),
     current_user: str = Depends(get_current_user),
-) -> bool:
+) -> LikePostResponse:
     post_service = PostService(session)
-    liked = await post_service.like_post(current_user, post_id)
-    return liked
+    return await post_service.like_post(current_user, post_id)
 
 
-@posts_router.post("/{post_id}/unlike", status_code=status.HTTP_200_OK)
+@posts_router.post(
+    "/{post_id}/unlike",
+    response_model=UnlikePostResponse,
+    status_code=status.HTTP_200_OK,
+)
 async def unlike_post(
     post_id: str,
     session: AsyncSession = Depends(get_db_session),
     current_user: str = Depends(get_current_user),
-) -> bool:
+) -> UnlikePostResponse:
     post_service = PostService(session)
-    unliked = await post_service.unlike_post(current_user, post_id)
-    return unliked
+    return await post_service.unlike_post(current_user, post_id)
 
 
 @posts_router.post(

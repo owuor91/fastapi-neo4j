@@ -95,7 +95,7 @@ class UserService:
         }
 
     async def get_user_profile(self, user_id: str) -> Optional[UserResponse]:
-        query = f"""
+        query = """
         MATCH (u:User {user_id: $user_id})
 
         //count followers
@@ -131,10 +131,10 @@ class UserService:
     async def search_users(
         self, query_str: str, limit: int = 20
     ) -> List[UserResponse]:
-        query = f"""
+        cypher = """
         MATCH (u:User)
-        WHERE toLower(u.username) CONTAINS toLower($query) OR toLower(u.full_name)
-        CONTAINS toLower($query)
+        WHERE toLower(u.username) CONTAINS toLower($query_str) OR
+              toLower(u.full_name) CONTAINS toLower($query_str)
 
         OPTIONAL MATCH (follower: User)-[:FOLLOWS]->(u)
         WITH u, COUNT(DISTINCT follower) AS follower_count
@@ -143,11 +143,13 @@ class UserService:
         WITH u, follower_count, COUNT(DISTINCT following) AS following_count
 
         RETURN u, follower_count, following_count
-        ORDER BY follower_count DESC    
+        ORDER BY follower_count DESC
         LIMIT $limit
         """
 
-        result = await self.session.run(query, query=query_str, limit=limit)
+        result = await self.session.run(
+            cypher, query_str=query_str, limit=limit
+        )
 
         users = []
         async for record in result:
