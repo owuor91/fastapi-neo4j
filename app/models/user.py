@@ -1,6 +1,9 @@
-from pydantic import BaseModel, Field, EmailStr, field_validator
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
+from app.utils.neo4j_helpers import to_python_datetime
 
 
 class UserBase(BaseModel):
@@ -28,3 +31,8 @@ class UserResponse(UserBase):
     created_at: datetime
     follower_count: int = 0
     following_count: int = 0
+
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def parse_created_at(cls, v):
+        return to_python_datetime(v)

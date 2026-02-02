@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Optional, List
 from app.models.user import UserResponse
 from app.models.post import PostResponse
+from app.models.social import FollowResponse, UnfollowResponse
 
 
 class SocialService:
@@ -33,7 +34,12 @@ class SocialService:
         )
 
         record = await result.single()
-        return record is not None
+        return FollowResponse(
+            follower_id=follower_id,
+            followed_id=following_id,
+            created_at=created_at,
+            success=record is not None,
+        )
 
     async def unfollow_user(self, follower_id: str, following_id: str) -> bool:
         if follower_id == following_id:
@@ -52,14 +58,18 @@ class SocialService:
         )
 
         record = await result.single()
-        return record["deleted_count"] > 0
+        return UnfollowResponse(
+            follower_id=follower_id,
+            followed_id=following_id,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            success=record["deleted_count"] > 0,
+        )
 
     async def get_followers(
         self, user_id: str, limit: int = 50
     ) -> List[UserResponse]:
         query = """
         MATCH (follower: User)-[:FOLLOWS]->(u:User {user_id: $user_id})
-        return follower
 
         OPTIONAL MATCH (follower)-[:FOLLOWS]->(following)
         WITH follower, COUNT(DISTINCT following) AS following_count
@@ -100,7 +110,7 @@ class SocialService:
     async def get_following(
         self, user_id: str, limit: int = 50
     ) -> List[UserResponse]:
-        query = f"""
+        query = """
         MATCH (u:User {user_id: $user_id})-[:FOLLOWS]->(following:User)
         return following
         """

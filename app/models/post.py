@@ -1,6 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, Field, field_validator
+
+from app.utils.neo4j_helpers import to_python_datetime
 
 
 class PostCreate(BaseModel):
@@ -19,6 +22,11 @@ class PostResponse(BaseModel):
     comments_count: int = 0
     is_liked: bool = False
 
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def parse_created_at(cls, v):
+        return to_python_datetime(v)
+
 
 class CommentCreate(BaseModel):
     content: str = Field(min_length=1, max_length=200)
@@ -30,3 +38,8 @@ class CommentResponse(BaseModel):
     author_id: str
     author_username: str
     created_at: datetime
+
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def parse_created_at(cls, v):
+        return to_python_datetime(v)

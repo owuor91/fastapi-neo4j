@@ -1,5 +1,8 @@
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel, field_validator
+
+from app.utils.neo4j_helpers import to_python_datetime
 
 
 class Token(BaseModel):
@@ -12,7 +15,7 @@ class TokenData(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    username: str
+    email: str
     password: str
 
 
@@ -25,6 +28,11 @@ class LoginResponse(BaseModel):
     full_name: str
     bio: str
     created_at: datetime
+
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def parse_created_at(cls, v):
+        return to_python_datetime(v)
 
 
 class TokenRefreshRequest(BaseModel):
@@ -40,3 +48,8 @@ class TokenRefreshResponse(BaseModel):
     full_name: str
     bio: str
     created_at: datetime
+
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def parse_created_at(cls, v):
+        return to_python_datetime(v)
